@@ -34,7 +34,7 @@ function Navbar() {
   return (
     <nav className="p-2 flex items-center justify-center">
       <div className="flex items-center justify-center gap-22 border p-2 border-white rounded-lg">
-        <div className="text-white text-lg font-semibold">BetterAuth</div>
+        <div className="text-white text-lg font-semibold">OG-TODO</div>
         <ul className="flex gap-16">
           {navItems.map((item) => (
             <li key={item.name}>

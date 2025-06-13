@@ -35,16 +35,30 @@ model Todo {
 }
 
 model Task {
-  id        String   @unique @default(uuid())
+  id        String    @unique @default(uuid())
   todoId    String
-  todo      Todo     @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  todo      Todo      @relation(fields: [todoId], references: [id], onDelete: Cascade)
+  title     String
+  completed Boolean
+  createdAt DateTime
+  updatedAt DateTime
+  SubTask   SubTask[]
+
+  @@index([todoId], name: "task_todoId_idx")
+  @@map("task")
+}
+
+model SubTask {
+  id        String   @unique @default(uuid())
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
   title     String
   completed Boolean
   createdAt DateTime
   updatedAt DateTime
 
-  @@index([todoId], name: "task_todoId_idx")
-  @@map("task")
+  @@index([taskId], name: "subtask_taskId_idx")
+  @@map("subtask")
 }
 
 model Notes {
