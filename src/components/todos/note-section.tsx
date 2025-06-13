@@ -1,4 +1,3 @@
-// components/NoteSection.tsx
 "use client";
 import React from "react";
 import { StickyNote, Trash2 } from "lucide-react";

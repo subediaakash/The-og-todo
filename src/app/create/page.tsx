@@ -1,7 +1,6 @@
-// components/TodoWorkSpace.tsx
 "use client";
 import React, { useState, KeyboardEvent } from "react";
-import { Todo, Task, SubTask, Note } from "@/types/todos";
+import { Todo, Task, SubTask } from "@/types/todos";
 import {
   generateId,
   formatDate,
@@ -36,7 +35,6 @@ export default function TodoWorkSpace() {
 
   const [focusedTaskId, setFocusedTaskId] = useState<string>("1");
 
-  // Task operations
   const addNewTask = () => {
     const newTaskId = generateId();
     setTodo((prev) => ({
@@ -129,7 +127,6 @@ export default function TodoWorkSpace() {
     }));
   };
 
-  // Notes operations - Only allow one note
   const addNote = () => {
     if (todo.notes.length === 0) {
       const newNoteId = generateId();
@@ -192,7 +189,6 @@ export default function TodoWorkSpace() {
     }
   };
 
-  // Calculate stats
   const stats = calculateStats(todo.tasks);
 
   return (
@@ -209,7 +205,6 @@ export default function TodoWorkSpace() {
           onAddNote={addNote}
         />
 
-        {/* Main Content */}
         <div className="space-y-6">
           <TasksSection
             tasks={todo.tasks}
@@ -224,7 +219,6 @@ export default function TodoWorkSpace() {
             onAddNewTask={addNewTask}
           />
 
-          {/* Notes Section - Only show if note exists */}
           {todo.notes.length > 0 && (
             <NoteSection
               note={todo.notes[0]}
