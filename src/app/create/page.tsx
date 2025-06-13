@@ -1,4 +1,4 @@
-import TodoWorkSpace from "@/components/todos/main-todo";
+import TodoWorkspaceManager from "@/components/todos/todo-workspace-manager";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
@@ -9,12 +9,11 @@ export default async function CreateTodosPage() {
   if (!session) {
     return <div>Not authenticated</div>;
   }
-
   const user = session.user;
 
   return (
     <div className="">
-      <TodoWorkSpace userId={user.id} selectedDate={new Date().toISOString()} />
+      <TodoWorkspaceManager userId={user.id} />
     </div>
   );
 }

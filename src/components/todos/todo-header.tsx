@@ -29,11 +29,11 @@ export function TodoHeader({
     <div className="mb-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">📝 Daily Todo</h1>
-          <div className="flex items-center gap-4 text-gray-400">
+          <h1 className="text-2xl font-bold mb-2">Todos</h1>
+          <div className="flex items-center gap-6 text-gray-400">
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>{formattedDate}</span>
+              <Calendar className="w-5 h-5" />
+              <span className="text">{formattedDate}</span>
             </div>
             <div className="text-sm">
               {completedTasks}/{totalTasks} tasks
@@ -41,34 +41,31 @@ export function TodoHeader({
                 ` • ${completedSubTasks}/${totalSubTasks} subtasks`}
             </div>
             {hasCompletedAllTasks && (
-              <span className="text-green-500 text-sm font-medium">
+              <span className="text-green-500 text-base font-semibold">
                 🎉 All Done!
               </span>
             )}
           </div>
         </div>
-
-        <div className="flex items-center gap-2 relative">
+        <div className="flex items-center gap-4 relative">
           {!hasNote && (
             <button
               onClick={onAddNote}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-colors"
+              className="p-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition-colors"
               title="Add Note"
             >
-              <StickyNote className="w-4 h-4" />
+              <StickyNote className="w-5 h-5" />
             </button>
           )}
-
           <button
             onClick={() => setShowHelp(!showHelp)}
-            className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-400 transition-colors"
+            className="w-10 h-10 rounded-full border border-gray-600 flex items-center justify-center text-gray-400 hover:text-white hover:border-gray-400 transition-colors bg-gray-800"
             title="Help"
           >
-            <span className="text-sm font-medium">?</span>
+            <span className="text-lg font-light">?</span>
           </button>
-
           {showHelp && (
-            <div className="absolute right-0 top-16 bg-[#0f0f0f] border border-gray-700 rounded-lg p-4 w-80 text-sm text-gray-300 z-10">
+            <div className="absolute right-0 top-12 bg-[#1f1f1f] border border-gray-700 rounded-lg p-4 w-80 text-sm text-gray-300 shadow-lg z-10">
               <div className="space-y-2">
                 <p>• Click anywhere in empty area to add new task</p>
                 <p>• Press Enter to create new task</p>

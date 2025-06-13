@@ -13,7 +13,6 @@ import { NoteSection } from "@/components/todos/note-section";
 import {
   createTodoWithRelations,
   updateTodoWithRelations,
-  getTodayTodo,
   getTodoByDate,
   deleteTodoWithRelations,
 } from "../../app/actions/todo-actions";
@@ -29,7 +28,7 @@ export default function TodoWorkSpace({
 }: TodoWorkSpaceProps) {
   const date = selectedDate ? new Date(selectedDate) : new Date();
   const formattedDate = formatDate(date);
-  const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD format
+  const dateKey = date.toISOString().split("T")[0];
 
   const [todo, setTodo] = useState<Todo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,18 +36,16 @@ export default function TodoWorkSpace({
   const [focusedTaskId, setFocusedTaskId] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Load todo for the selected date
   useEffect(() => {
     loadTodoForDate();
   }, [dateKey, userId]);
 
-  // Auto-save functionality
   useEffect(() => {
+    // Autosave after every 5 seconds if there are unsaved changes
     if (hasUnsavedChanges && todo) {
       const timeoutId = setTimeout(() => {
         saveTodo();
-      }, 2000); // Auto-save after 2 seconds of inactivity
-
+      }, 1000);
       return () => clearTimeout(timeoutId);
     }
   }, [todo, hasUnsavedChanges]);
@@ -119,7 +116,6 @@ export default function TodoWorkSpace({
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error saving todo:", error);
-      // You might want to show a toast notification here
     } finally {
       setIsSaving(false);
     }
@@ -317,11 +313,6 @@ export default function TodoWorkSpace({
     }
   };
 
-  // Manual save function
-  const handleSave = async () => {
-    await saveTodo();
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#191919] text-white p-8">
@@ -343,29 +334,14 @@ export default function TodoWorkSpace({
   return (
     <div className="min-h-screen bg-[#191919] text-white p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Save status indicator */}
-        <div className="mb-4 flex justify-between items-center">
+        {/* Status Indicator */}
+        <div className="mb-4">
           <div className="text-sm text-gray-400">
             {isSaving
               ? "Saving..."
               : hasUnsavedChanges
-              ? "Unsaved changes"
+              ? "Unsaved changes (autosaving)"
               : "Saved"}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleSave}
-              disabled={isSaving || !hasUnsavedChanges}
-              className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-50"
-            >
-              Save
-            </button>
-            <button
-              onClick={deleteTodo}
-              className="px-3 py-1 bg-red-600 text-white rounded text-sm"
-            >
-              Delete Todo
-            </button>
           </div>
         </div>
 
