@@ -11,4 +11,10 @@ export const auth = betterAuth({
     enabled: true,
     emailVerification: false,
   },
+  session: {
+    freshAge: 60 * 60 * 7 * 5,
+    disableSessionRefresh: true,
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+  },
 });

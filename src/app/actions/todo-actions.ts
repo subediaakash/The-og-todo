@@ -10,15 +10,8 @@ export async function createTodoWithRelations(todoData: Todo, userId: string) {
       data: {
         id: todoData.id,
         hasCompletedAllTasks: todoData.hasCompletedAllTasks,
-        // Ensure dates are properly formatted
-        createdAt:
-          typeof todoData.createdAt === "string"
-            ? todoData.createdAt
-            : new Date(todoData.createdAt).toISOString(),
-        updatedAt:
-          typeof todoData.updatedAt === "string"
-            ? todoData.updatedAt
-            : new Date(todoData.updatedAt).toISOString(),
+        createdAt: todoData.createdAt,
+        updatedAt: todoData.updatedAt,
         User: { connect: { id: userId } },
         task: {
           create: todoData.tasks.map((task) => ({
@@ -58,7 +51,7 @@ export async function createTodoWithRelations(todoData: Todo, userId: string) {
     });
 
     revalidatePath("/todos");
-    return todo;
+    return transformPrismaToTodo(todo);
   } catch (error) {
     console.error("Error creating todo:", error);
     throw error;
@@ -68,6 +61,15 @@ export async function createTodoWithRelations(todoData: Todo, userId: string) {
 export async function updateTodoWithRelations(todoData: Todo, userId: string) {
   try {
     const todo = await prisma.$transaction(async (tx) => {
+      // Delete existing tasks and notes
+      await tx.subTask.deleteMany({
+        where: {
+          task: {
+            todoId: todoData.id,
+          },
+        },
+      });
+
       await tx.task.deleteMany({
         where: { todoId: todoData.id },
       });
@@ -76,6 +78,7 @@ export async function updateTodoWithRelations(todoData: Todo, userId: string) {
         where: { todoId: todoData.id },
       });
 
+      // Update todo with new data
       return await tx.todo.update({
         where: {
           id: todoData.id,
@@ -83,10 +86,7 @@ export async function updateTodoWithRelations(todoData: Todo, userId: string) {
         },
         data: {
           hasCompletedAllTasks: todoData.hasCompletedAllTasks,
-          updatedAt:
-            typeof todoData.updatedAt === "string"
-              ? todoData.updatedAt
-              : new Date(todoData.updatedAt).toISOString(),
+          updatedAt: todoData.updatedAt,
           task: {
             create: todoData.tasks.map((task) => ({
               id: task.id,
@@ -126,7 +126,7 @@ export async function updateTodoWithRelations(todoData: Todo, userId: string) {
     });
 
     revalidatePath("/todos");
-    return todo;
+    return transformPrismaToTodo(todo);
   } catch (error) {
     console.error("Error updating todo:", error);
     throw error;
@@ -177,6 +177,24 @@ export async function getTodoById(
   }
 }
 
+export async function getTodoByDate(
+  date: string, // Format: YYYY-MM-DD
+  userId: string
+): Promise<Todo | null> {
+  try {
+    const todoId = `todo-${date}`;
+    return await getTodoById(todoId, userId);
+  } catch (error) {
+    console.error("Error fetching todo by date:", error);
+    return null;
+  }
+}
+
+export async function getTodayTodo(userId: string): Promise<Todo | null> {
+  const today = new Date().toISOString().split("T")[0];
+  return getTodoByDate(today, userId);
+}
+
 export async function getAllTodos(userId: string): Promise<Todo[]> {
   try {
     const prismaTodos = await prisma.todo.findMany({
@@ -199,6 +217,210 @@ export async function getAllTodos(userId: string): Promise<Todo[]> {
     return prismaTodos.map(transformPrismaToTodo);
   } catch (error) {
     console.error("Error fetching todos:", error);
+    throw error;
+  }
+}
+
+export async function getTodosByDateRange(
+  startDate: string,
+  endDate: string,
+  userId: string
+): Promise<Todo[]> {
+  try {
+    const prismaTodos = await prisma.todo.findMany({
+      where: {
+        userId: userId,
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        task: {
+          include: {
+            SubTask: true,
+          },
+        },
+        Notes: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return prismaTodos.map(transformPrismaToTodo);
+  } catch (error) {
+    console.error("Error fetching todos by date range:", error);
+    throw error;
+  }
+}
+
+// Additional CRUD operations for individual tasks and subtasks
+export async function updateSingleTask(
+  taskId: string,
+  updates: { title?: string; completed?: boolean },
+  userId: string
+) {
+  try {
+    const task = await prisma.task.update({
+      where: {
+        id: taskId,
+        todo: {
+          userId: userId,
+        },
+      },
+      data: {
+        ...updates,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Update parent todo's updatedAt
+    await prisma.todo.update({
+      where: {
+        id: task.todoId,
+        userId: userId,
+      },
+      data: {
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    revalidatePath("/todos");
+    return task;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    throw error;
+  }
+}
+
+export async function updateSingleSubTask(
+  subTaskId: string,
+  updates: { title?: string; completed?: boolean },
+  userId: string
+) {
+  try {
+    const subtask = await prisma.subTask.update({
+      where: {
+        id: subTaskId,
+        task: {
+          todo: {
+            userId: userId,
+          },
+        },
+      },
+      data: {
+        ...updates,
+        updatedAt: new Date(),
+      },
+      include: {
+        task: true,
+      },
+    });
+
+    // Update parent todo's updatedAt
+    await prisma.todo.update({
+      where: {
+        id: subtask.task.todoId,
+        userId: userId,
+      },
+      data: {
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    revalidatePath("/todos");
+    return subtask;
+  } catch (error) {
+    console.error("Error updating subtask:", error);
+    throw error;
+  }
+}
+
+export async function deleteTask(taskId: string, userId: string) {
+  try {
+    const task = await prisma.task.findUnique({
+      where: {
+        id: taskId,
+        todo: {
+          userId: userId,
+        },
+      },
+      select: {
+        todoId: true,
+      },
+    });
+
+    if (!task) {
+      throw new Error("Task not found or unauthorized");
+    }
+
+    await prisma.task.delete({
+      where: {
+        id: taskId,
+      },
+    });
+
+    // Update parent todo's updatedAt
+    await prisma.todo.update({
+      where: {
+        id: task.todoId,
+        userId: userId,
+      },
+      data: {
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    revalidatePath("/todos");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    throw error;
+  }
+}
+
+export async function deleteSubTask(subTaskId: string, userId: string) {
+  try {
+    const subtask = await prisma.subTask.findUnique({
+      where: {
+        id: subTaskId,
+        task: {
+          todo: {
+            userId: userId,
+          },
+        },
+      },
+      include: {
+        task: true,
+      },
+    });
+
+    if (!subtask) {
+      throw new Error("Subtask not found or unauthorized");
+    }
+
+    await prisma.subTask.delete({
+      where: {
+        id: subTaskId,
+      },
+    });
+
+    // Update parent todo's updatedAt
+    await prisma.todo.update({
+      where: {
+        id: subtask.task.todoId,
+        userId: userId,
+      },
+      data: {
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    revalidatePath("/todos");
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting subtask:", error);
     throw error;
   }
 }
