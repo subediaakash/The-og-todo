@@ -24,11 +24,9 @@ export default function TodoWorkspaceManager({
       try {
         const todos = await getAllTodos(userId);
 
-        // Extract unique dates from todos
         const uniqueDates = Array.from(
           new Set(
             todos.map((todo: any) => {
-              // Handle both string and date formats
               const dateStr =
                 typeof todo.createdAt === "string"
                   ? todo.createdAt
@@ -47,7 +45,6 @@ export default function TodoWorkspaceManager({
 
         setWorkspaces(ws);
 
-        // Auto-create today's workspace if it doesn't exist
         if (!uniqueDates.includes(today)) {
           setWorkspaces((prev) => [...prev, { date: today }]);
         }
@@ -60,7 +57,6 @@ export default function TodoWorkspaceManager({
   }, [userId, today]);
 
   const handleAddWorkspace = () => {
-    // Check if workspace for selected date already exists
     const existingWorkspace = workspaces.find((ws) => ws.date === selectedDate);
 
     if (existingWorkspace) {
@@ -68,11 +64,9 @@ export default function TodoWorkspaceManager({
       return;
     }
 
-    // Add new workspace
     const newWorkspace = { date: selectedDate };
     setWorkspaces((prev) => {
       const updated = [...prev, newWorkspace];
-      // Sort by date (oldest first)
       return updated.sort(
         (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
       );
@@ -134,7 +128,6 @@ export default function TodoWorkspaceManager({
       <div className="space-y-8">
         {workspaces.map((ws, index) => (
           <div key={ws.date} className="workspace-container">
-            {/* Workspace Header */}
             <div className="flex items-center justify-between mb-4 px-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm font-medium text-white">
@@ -155,9 +148,8 @@ export default function TodoWorkspaceManager({
               )}
             </div>
 
-            {/* Workspace Content - Wrapped to prevent full page takeover */}
             <div className="workspace-content bg-[#1a1a1a] rounded-lg border border-gray-700 overflow-hidden">
-              <div className="workspace-wrapper">
+              <div>
                 <TodoWorkSpace userId={userId} selectedDate={ws.date} />
               </div>
             </div>
@@ -173,29 +165,6 @@ export default function TodoWorkspaceManager({
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        .workspace-wrapper {
-          /* Override the min-h-screen from TodoWorkSpace */
-          min-height: auto !important;
-        }
-
-        .workspace-wrapper > div {
-          min-height: auto !important;
-          padding: 2rem !important;
-        }
-
-        .workspace-content {
-          /* Ensure the workspace content fits its content */
-          height: auto;
-          overflow: visible;
-        }
-
-        /* Make the TodoWorkSpace component more compact */
-        .workspace-wrapper .min-h-screen {
-          min-height: auto !important;
-        }
-      `}</style>
     </div>
   );
 }

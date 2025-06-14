@@ -158,7 +158,6 @@ export default function TodoWorkSpace({
       updatedAt: new Date().toISOString(),
     }));
 
-    // Update completion status after state update
     setTimeout(() => {
       if (todo) {
         const updatedTasks = todo.tasks.map((task) =>
@@ -221,7 +220,6 @@ export default function TodoWorkSpace({
       updatedAt: new Date().toISOString(),
     }));
 
-    // Update completion status
     setTimeout(() => {
       if (todo) {
         updateTodoState((prev) => ({
@@ -314,7 +312,7 @@ export default function TodoWorkSpace({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#191919] text-white p-8">
+      <div className=" bg-[#191919] text-white p-8">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-700 rounded mb-4"></div>
@@ -331,7 +329,7 @@ export default function TodoWorkSpace({
   const stats = calculateStats(todo.tasks);
 
   return (
-    <div className="min-h-screen bg-[#191919] text-white p-8">
+    <div className=" bg-[#191919] text-white p-8">
       <div className="max-w-4xl mx-auto">
         {/* Status Indicator */}
         <div className="mb-4">
