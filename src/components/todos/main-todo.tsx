@@ -41,7 +41,6 @@ export default function TodoWorkSpace({
   }, [dateKey, userId]);
 
   useEffect(() => {
-    // Autosave after every 5 seconds if there are unsaved changes
     if (hasUnsavedChanges && todo) {
       const timeoutId = setTimeout(() => {
         saveTodo();
