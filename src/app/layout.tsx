@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/common/navbar";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,8 +27,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased christmas-tree-bg min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable}  bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0f0f0f] `}
       >
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: "bg-[#0f0f0f] text-gray-300 border border-gray-700",
+            style: {
+              fontFamily: "var(--font-geist-mono)",
+            },
+          }}
+        />
         <Navbar />
         {children}
       </body>

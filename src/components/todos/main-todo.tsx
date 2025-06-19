@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect, KeyboardEvent } from "react";
-import { Todo, Task, SubTask } from "@/types/todos";
+import { useState, useEffect, type KeyboardEvent } from "react";
+import type { Todo, Task, SubTask } from "@/types/todos";
 import {
   generateId,
   formatDate,
@@ -16,6 +16,7 @@ import {
   getTodoByDate,
   deleteTodoWithRelations,
 } from "../../app/actions/todo-actions";
+import { Loader2, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 
 interface TodoWorkSpaceProps {
   userId: string;
@@ -35,6 +36,7 @@ export default function TodoWorkSpace({
   const [isSaving, setIsSaving] = useState(false);
   const [focusedTaskId, setFocusedTaskId] = useState<string>("");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveError, setSaveError] = useState<string>("");
 
   useEffect(() => {
     loadTodoForDate();
@@ -52,6 +54,7 @@ export default function TodoWorkSpace({
   const loadTodoForDate = async () => {
     try {
       setIsLoading(true);
+      setSaveError("");
       const existingTodo = await getTodoByDate(dateKey, userId);
 
       if (existingTodo) {
@@ -69,6 +72,7 @@ export default function TodoWorkSpace({
       }
     } catch (error) {
       console.error("Error loading todo:", error);
+      setSaveError("Failed to load todo data");
       const newTodo = createNewTodo(dateKey);
       setTodo(newTodo);
       setFocusedTaskId(newTodo.tasks[0].id);
@@ -103,6 +107,7 @@ export default function TodoWorkSpace({
 
     try {
       setIsSaving(true);
+      setSaveError("");
 
       const existingTodo = await getTodoByDate(dateKey, userId);
 
@@ -115,6 +120,7 @@ export default function TodoWorkSpace({
       setHasUnsavedChanges(false);
     } catch (error) {
       console.error("Error saving todo:", error);
+      setSaveError("Failed to save changes");
     } finally {
       setIsSaving(false);
     }
@@ -125,6 +131,7 @@ export default function TodoWorkSpace({
       if (!prev) return prev;
       const updated = updater(prev);
       setHasUnsavedChanges(true);
+      setSaveError("");
       return updated;
     });
   };
@@ -278,12 +285,12 @@ export default function TodoWorkSpace({
 
     try {
       await deleteTodoWithRelations(todo.id, userId);
-      // Navigate back or reset to new todo
       const newTodo = createNewTodo(dateKey);
       setTodo(newTodo);
       setFocusedTaskId(newTodo.tasks[0].id);
     } catch (error) {
       console.error("Error deleting todo:", error);
+      setSaveError("Failed to delete todo");
     }
   };
 
@@ -312,12 +319,22 @@ export default function TodoWorkSpace({
 
   if (isLoading) {
     return (
-      <div className=" bg-[#191919] text-white p-8">
+      <div className="min-h-screen bg-gradient-to-br from-[#191919] via-[#1a1a1a] to-[#181818] text-white p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-700 rounded mb-4"></div>
-            <div className="h-6 bg-gray-700 rounded mb-2"></div>
-            <div className="h-6 bg-gray-700 rounded mb-2"></div>
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-blue-500/25">
+                <Loader2 className="w-8 h-8 text-white animate-spin" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-gray-300">
+                  Loading your workspace
+                </h3>
+                <p className="text-sm text-gray-400">
+                  Preparing your tasks for {formattedDate}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -329,16 +346,53 @@ export default function TodoWorkSpace({
   const stats = calculateStats(todo.tasks);
 
   return (
-    <div className=" bg-[#191919] text-white p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#191919] via-[#1a1a1a] to-[#181818] text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Status Indicator */}
-        <div className="mb-4">
-          <div className="text-sm text-gray-400">
-            {isSaving
-              ? "Saving..."
-              : hasUnsavedChanges
-              ? "Unsaved changes (autosaving)"
-              : "Saved"}
+        {/* Enhanced Status Indicator */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gray-800/30 to-gray-700/20 rounded-lg border border-gray-700/30 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              {isSaving ? (
+                <>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                  <span className="text-sm font-medium text-blue-400">
+                    Saving changes...
+                  </span>
+                </>
+              ) : hasUnsavedChanges ? (
+                <>
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <Clock className="w-4 h-4 text-yellow-400" />
+                  <span className="text-sm font-medium text-yellow-400">
+                    Auto-saving in progress
+                  </span>
+                </>
+              ) : saveError ? (
+                <>
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                  <span className="text-sm font-medium text-red-400">
+                    {saveError}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-medium text-green-400">
+                    All changes saved
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Last updated timestamp */}
+            {todo.updatedAt && !hasUnsavedChanges && !isSaving && (
+              <div className="ml-auto text-xs text-gray-500 font-mono">
+                Last updated: {new Date(todo.updatedAt).toLocaleTimeString()}
+              </div>
+            )}
           </div>
         </div>
 
@@ -353,7 +407,7 @@ export default function TodoWorkSpace({
           onAddNote={addNote}
         />
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <TasksSection
             tasks={todo.tasks}
             updateTask={updateTask}
@@ -368,13 +422,24 @@ export default function TodoWorkSpace({
           />
 
           {todo.notes.length > 0 && (
-            <NoteSection
-              note={todo.notes[0]}
-              updateNote={updateNote}
-              deleteNote={deleteNote}
-            />
+            <div className="animate-in slide-in-from-bottom-4 duration-300">
+              <NoteSection
+                note={todo.notes[0]}
+                updateNote={updateNote}
+                deleteNote={deleteNote}
+              />
+            </div>
           )}
         </div>
+
+        {/* Floating Action Hint */}
+        {todo.tasks.length === 1 && todo.tasks[0].title === "" && (
+          <div className="fixed bottom-8 right-8 p-4 bg-gradient-to-r from-blue-600 to-blue-500 rounded-full shadow-lg shadow-blue-500/25 animate-bounce">
+            <div className="text-white text-sm font-medium">
+              Start typing to create your first task!
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
