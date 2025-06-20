@@ -9,7 +9,7 @@ datasource db {
 }
 
 model User {
-  id            String    @unique @default(uuid())
+  id            String        @unique @default(uuid())
   email         String
   todos         Todo[]
   name          String
@@ -20,6 +20,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   Streak        Streak[]
+  Commitments   Commitments[]
 
   @@map("user")
 }
@@ -123,4 +124,24 @@ model Streak {
   userId        String   @unique
   user          User     @relation(fields: [userId], references: [id])
   lastUpdated   DateTime @default("1970-01-01T00:00:00Z")
+}
+
+model Commitments {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  priority    Priority
+  category    String
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }
