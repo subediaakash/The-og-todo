@@ -84,7 +84,6 @@ export default function TodoWorkSpace({
   const createNewTodo = (dateKey: string): Todo => {
     const firstTaskId = generateId();
     return {
-      id: `todo-${dateKey}`,
       tasks: [
         {
           id: firstTaskId,
@@ -109,12 +108,11 @@ export default function TodoWorkSpace({
       setIsSaving(true);
       setSaveError("");
 
-      const existingTodo = await getTodoByDate(dateKey, userId);
-
-      if (existingTodo) {
+      if (todo.id) {
         await updateTodoWithRelations(todo, userId);
       } else {
-        await createTodoWithRelations(todo, userId);
+        const created = await createTodoWithRelations(todo, userId);
+        setTodo(created);
       }
 
       setHasUnsavedChanges(false);
@@ -281,7 +279,7 @@ export default function TodoWorkSpace({
   };
 
   const deleteTodo = async () => {
-    if (!todo) return;
+    if (!todo || !todo.id) return;
 
     try {
       await deleteTodoWithRelations(todo.id, userId);
