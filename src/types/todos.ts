@@ -20,7 +20,7 @@ export interface Note {
 }
 
 export interface Todo {
-  id: string;
+  id?: string;
   tasks: Task[];
   notes: Note[];
   hasCompletedAllTasks: boolean;

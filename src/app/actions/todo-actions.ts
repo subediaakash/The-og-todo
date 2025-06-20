@@ -8,7 +8,6 @@ export async function createTodoWithRelations(todoData: Todo, userId: string) {
   try {
     const todo = await prisma.todo.create({
       data: {
-        id: todoData.id,
         hasCompletedAllTasks: todoData.hasCompletedAllTasks,
         createdAt: todoData.createdAt,
         updatedAt: todoData.updatedAt,
@@ -182,8 +181,24 @@ export async function getTodoByDate(
   userId: string
 ): Promise<Todo | null> {
   try {
-    const todoId = `todo-${date}`;
-    return await getTodoById(todoId, userId);
+    // Find the todo for the user where createdAt starts with the date string
+    const prismaTodo = await prisma.todo.findFirst({
+      where: {
+        userId: userId,
+        createdAt: {
+          startsWith: date,
+        },
+      },
+      include: {
+        task: {
+          include: {
+            SubTask: true,
+          },
+        },
+        Notes: true,
+      },
+    });
+    return prismaTodo ? transformPrismaToTodo(prismaTodo) : null;
   } catch (error) {
     console.error("Error fetching todo by date:", error);
     return null;
