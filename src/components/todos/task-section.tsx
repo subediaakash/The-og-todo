@@ -117,7 +117,10 @@ export function TasksSection({
 
           {/* Add task hint for non-empty state */}
           {!hasEmptyTask && (
-            <div className="mt-6 p-4 border-2 border-dashed border-gray-700/30 rounded-lg text-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:border-gray-600/50 hover:bg-gray-800/20">
+            <div
+              onClick={onAddNewTask}
+              className="mt-6 p-4 border-2 border-dashed border-gray-700/30 rounded-lg text-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:border-gray-600/50 hover:bg-gray-800/20 cursor-pointer"
+            >
               <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
                 <Plus className="w-4 h-4" />
                 <span>Click here to add another task</span>

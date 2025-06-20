@@ -406,7 +406,6 @@ export async function deleteSubTask(subTaskId: string, userId: string) {
       },
     });
 
-    // Update parent todo's updatedAt
     await prisma.todo.update({
       where: {
         id: subtask.task.todoId,

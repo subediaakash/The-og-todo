@@ -19,6 +19,7 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+  Streak        Streak[]
 
   @@map("user")
 }
@@ -113,4 +114,13 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Streak {
+  id            String   @id @default(uuid())
+  currentStreak Int      @default(0)
+  longestStreak Int      @default(0)
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  lastUpdated   DateTime @default("1970-01-01T00:00:00Z")
 }
