@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2, LogOut, Shield, AlertTriangle, Download } from "lucide-react";
+import {
+  Trash2,
+  LogOut,
+  Shield,
+  AlertTriangle,
+  Download,
+  CheckCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import {
-  deleteAccount,
-  exportUserData,
-} from "@/app/actions/profile-actions";
-import { redirect } from "next/dist/server/api-utils";
+import { deleteAccount, exportUserData } from "@/app/actions/profile-actions";
 import { authClient } from "@/lib/auth-client";
 
 interface DangerZoneProps {
@@ -20,14 +23,33 @@ export function DangerZone({ userId }: DangerZoneProps) {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error" | null;
+    message: string;
+  }>({ type: null, message: "" });
+
+  const clearFeedback = () => {
+    setTimeout(() => setFeedback({ type: null, message: "" }), 3000);
+  };
 
   const handleLogout = () => {
     startTransition(async () => {
       try {
-        const truth = await authClient.signOut();
-        router.push("/login");
+        await authClient.signOut();
+        setFeedback({ type: "success", message: "Successfully signed out!" });
+        clearFeedback();
+        // Small delay to show success message before redirect
+        setTimeout(() => {
+          router.push("/login");
+        }, 1000);
       } catch (error) {
         console.error("Error logging out:", error);
+        setFeedback({
+          type: "error",
+          message: "Failed to sign out. Please try again.",
+        });
+        clearFeedback();
       }
     });
   };
@@ -35,9 +57,33 @@ export function DangerZone({ userId }: DangerZoneProps) {
   const handleExportData = () => {
     startTransition(async () => {
       try {
-        await exportUserData(userId);
+        const jsonData = await exportUserData(userId);
+
+        // Create and download the file
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `user-data-export-${
+          new Date().toISOString().split("T")[0]
+        }.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        setFeedback({
+          type: "success",
+          message: "Data exported successfully!",
+        });
+        clearFeedback();
       } catch (error) {
         console.error("Error exporting data:", error);
+        setFeedback({
+          type: "error",
+          message: "Failed to export data. Please try again.",
+        });
+        clearFeedback();
       }
     });
   };
@@ -48,11 +94,37 @@ export function DangerZone({ userId }: DangerZoneProps) {
       return;
     }
 
+    if (deleteConfirmation.toLowerCase() !== "delete") {
+      setFeedback({
+        type: "error",
+        message: "Please type 'DELETE' to confirm account deletion.",
+      });
+      clearFeedback();
+      return;
+    }
+
     startTransition(async () => {
       try {
         await deleteAccount(userId);
+        await authClient.signOut();
+        setFeedback({
+          type: "success",
+          message: "Account deleted successfully. Redirecting...",
+        });
+
+        // Redirect after a short delay
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
       } catch (error) {
         console.error("Error deleting account:", error);
+        setFeedback({
+          type: "error",
+          message: "Failed to delete account. Please try again.",
+        });
+        clearFeedback();
+        setShowDeleteConfirm(false);
+        setDeleteConfirmation("");
       }
     });
   };
@@ -69,28 +141,22 @@ export function DangerZone({ userId }: DangerZoneProps) {
         </div>
       </div>
 
-      <div className="space-y-4">
-        {/* Export Data */}
-        <div className="p-4 bg-[#0a0a0a] border border-gray-600/50 rounded-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Download className="w-5 h-5 text-blue-400" />
-              <div>
-                <div className="text-white font-medium">Export Your Data</div>
-                <div className="text-gray-400 text-sm">
-                  Download all your data in JSON format
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={handleExportData}
-              disabled={isPending}
-              className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-all hover:scale-105 disabled:opacity-50"
-            >
-              Export
-            </button>
-          </div>
+      {/* Feedback Message */}
+      {feedback.type && (
+        <div
+          className={`mb-4 p-3 rounded-lg border flex items-center gap-2 ${
+            feedback.type === "success"
+              ? "bg-green-500/10 border-green-500/20 text-green-400"
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+          }`}
+        >
+          {feedback.type === "success" && <CheckCircle className="w-4 h-4" />}
+          {feedback.type === "error" && <AlertTriangle className="w-4 h-4" />}
+          <span className="text-sm">{feedback.message}</span>
         </div>
+      )}
+
+      <div className="space-y-4">
 
         {/* Logout */}
         <div className="p-4 bg-[#0a0a0a] border border-gray-600/50 rounded-xl">
@@ -107,9 +173,9 @@ export function DangerZone({ userId }: DangerZoneProps) {
             <button
               onClick={handleLogout}
               disabled={isPending}
-              className="px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 rounded-lg transition-all hover:scale-105 disabled:opacity-50"
+              className="px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Sign Out
+              {isPending ? "Signing Out..." : "Sign Out"}
             </button>
           </div>
         </div>
@@ -129,31 +195,59 @@ export function DangerZone({ userId }: DangerZoneProps) {
             <button
               onClick={handleDeleteAccount}
               disabled={isPending}
-              className={`px-4 py-2 border rounded-lg transition-all hover:scale-105 disabled:opacity-50 ${
+              className={`px-4 py-2 border rounded-lg transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
                 showDeleteConfirm
                   ? "bg-red-500 hover:bg-red-600 text-white border-red-500"
                   : "bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
               }`}
             >
-              {showDeleteConfirm ? "Confirm Delete" : "Delete"}
+              {isPending
+                ? "Deleting..."
+                : showDeleteConfirm
+                ? "Confirm Delete"
+                : "Delete"}
             </button>
           </div>
 
           {showDeleteConfirm && (
-            <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <div className="flex items-center gap-2 text-red-400 text-sm">
-                <AlertTriangle className="w-4 h-4" />
-                <span>
-                  This action cannot be undone. All your data will be
-                  permanently deleted.
-                </span>
+            <div className="mt-4 space-y-4">
+              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <div className="flex items-center gap-2 text-red-400 text-sm mb-2">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="font-medium">
+                    This action cannot be undone. All your data will be
+                    permanently deleted.
+                  </span>
+                </div>
+                <div className="text-gray-400 text-sm">
+                  Type{" "}
+                  <span className="font-mono bg-gray-800 px-1 rounded">
+                    DELETE
+                  </span>{" "}
+                  to confirm:
+                </div>
               </div>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="mt-2 text-gray-400 hover:text-white text-sm underline"
-              >
-                Cancel
-              </button>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={deleteConfirmation}
+                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="flex-1 px-3 py-2 bg-[#0a0a0a] border border-gray-600/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50"
+                  disabled={isPending}
+                />
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setDeleteConfirmation("");
+                  }}
+                  disabled={isPending}
+                  className="px-3 py-2 text-gray-400 hover:text-white text-sm border border-gray-600/50 rounded-lg hover:bg-gray-800/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
         </div>

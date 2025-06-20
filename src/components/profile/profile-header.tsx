@@ -86,16 +86,6 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
               </div>
             </div>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex gap-3">
-            <button className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg transition-all hover:scale-105">
-              Export Data
-            </button>
-            <button className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 rounded-lg transition-all hover:scale-105">
-              Share Profile
-            </button>
-          </div>
         </div>
       </div>
     </div>

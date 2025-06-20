@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import {
   getCommitments,
   getCommitmentStats,
-} from "../actions/commitment-actions";
+} from "../../actions/commitment-actions"; 
 import { CommitmentDashboard } from "@/components/commitments/commitment-dashboard";
 
 export default async function CommitmentsPage() {

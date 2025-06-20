@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const SignInForm = () => {
+const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -305,7 +305,7 @@ const SignInForm = () => {
             {/* Sign Up Link */}
             <div className="text-center">
               <Link
-                href="/sign-up"
+                href="/register"
                 className="group inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
               >
                 <span>Create your free account</span>
@@ -326,4 +326,4 @@ const SignInForm = () => {
   );
 };
 
-export default SignInForm;
+export default LoginForm;

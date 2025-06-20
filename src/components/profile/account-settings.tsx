@@ -77,63 +77,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
           />
         </div>
 
-        {/* Preferences */}
-        <div className="space-y-4">
-          <h4 className="text-lg font-semibold text-white">Preferences</h4>
-
-          <div className="space-y-3">
-            <label className="flex items-center justify-between p-3 bg-[#0a0a0a] rounded-xl border border-gray-600/50">
-              <div className="flex items-center gap-3">
-                <Bell className="w-5 h-5 text-orange-400" />
-                <div>
-                  <div className="text-white font-medium">
-                    Email Notifications
-                  </div>
-                  <div className="text-gray-400 text-sm">
-                    Receive updates about your commitments
-                  </div>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                className="w-5 h-5 text-blue-500 rounded"
-              />
-            </label>
-
-            <label className="flex items-center justify-between p-3 bg-[#0a0a0a] rounded-xl border border-gray-600/50">
-              <div className="flex items-center gap-3">
-                <Globe className="w-5 h-5 text-green-400" />
-                <div>
-                  <div className="text-white font-medium">Public Profile</div>
-                  <div className="text-gray-400 text-sm">
-                    Make your profile visible to others
-                  </div>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                className="w-5 h-5 text-blue-500 rounded"
-              />
-            </label>
-
-            <label className="flex items-center justify-between p-3 bg-[#0a0a0a] rounded-xl border border-gray-600/50">
-              <div className="flex items-center gap-3">
-                <Palette className="w-5 h-5 text-purple-400" />
-                <div>
-                  <div className="text-white font-medium">Dark Mode</div>
-                  <div className="text-gray-400 text-sm">
-                    Use dark theme (currently enabled)
-                  </div>
-                </div>
-              </div>
-              <input
-                type="checkbox"
-                className="w-5 h-5 text-blue-500 rounded"
-                defaultChecked
-              />
-            </label>
-          </div>
-        </div>
+   
 
         {/* Save Button */}
         <button

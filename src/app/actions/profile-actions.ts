@@ -5,6 +5,7 @@ import type { ProfileStats, UpdateProfileData } from "@/types/profile";
 import { revalidatePath } from "next/cache";
 import { authClient } from "@/lib/auth-client";
 import { redirect as nextRedirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 
 export async function getUserProfile(userId: string): Promise<User> {
   try {
@@ -83,7 +84,7 @@ export async function updateUserProfile(
   }
 }
 
-export async function exportUserData(userId: string): Promise<void> {
+export async function exportUserData(userId: string): Promise<string> {
   try {
     const userData = await prisma.user.findUnique({
       where: { id: userId },
@@ -102,8 +103,67 @@ export async function exportUserData(userId: string): Promise<void> {
         Streak: true,
       },
     });
-    // TODO : create a pdf file and send the data
-    console.log("User data export:", userData);
+
+    if (!userData) {
+      throw new Error("User not found");
+    }
+
+    // Create a clean export object
+    const exportData = {
+      user: {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        createdAt: userData.createdAt,
+        updatedAt: userData.updatedAt,
+      },
+      todos: userData.todos.map(todo => ({
+        id: todo.id,
+        createdAt: todo.createdAt,
+        updatedAt: todo.updatedAt,
+        hasCompletedAllTasks: todo.hasCompletedAllTasks,
+        tasks: todo.task.map(task => ({
+          id: task.id,
+          title: task.title,
+          completed: task.completed,
+          createdAt: task.createdAt,
+          updatedAt: task.updatedAt,
+          subtasks: task.SubTask.map(subtask => ({
+            id: subtask.id,
+            title: subtask.title,
+            completed: subtask.completed,
+            createdAt: subtask.createdAt,
+            updatedAt: subtask.updatedAt,
+          })),
+        })),
+        notes: todo.Notes.map(note => ({
+          id: note.id,
+          note: note.note,
+          createdAt: note.createdAt,
+          updatedAt: note.updatedAt,
+        })),
+      })),
+      commitments: userData.Commitments.map(commitment => ({
+        id: commitment.id,
+        title: commitment.title,
+        description: commitment.description,
+        priority: commitment.priority,
+        category: commitment.category,
+        dueDate: commitment.dueDate,
+        isCompleted: commitment.isCompleted,
+        createdAt: commitment.createdAt,
+        updatedAt: commitment.updatedAt,
+      })),
+      streak: userData.Streak.map(streak => ({
+        id: streak.id,
+        currentStreak: streak.currentStreak,
+        longestStreak: streak.longestStreak,
+        lastUpdated: streak.lastUpdated,
+      })),
+      exportedAt: new Date().toISOString(),
+    };
+
+    return JSON.stringify(exportData, null, 2);
   } catch (error) {
     console.error("Error exporting user data:", error);
     throw new Error("Failed to export user data");
@@ -112,12 +172,79 @@ export async function exportUserData(userId: string): Promise<void> {
 
 export async function deleteAccount(userId: string): Promise<void> {
   try {
-    await prisma.user.delete({
-      where: { id: userId },
+    // Start a transaction to ensure all data is deleted atomically
+    await prisma.$transaction(async (tx) => {
+      // Delete all user sessions first
+      await tx.session.deleteMany({
+        where: { userId },
+      });
+
+      // Delete all user accounts (auth providers)
+      await tx.account.deleteMany({
+        where: { userId },
+      });
+
+      // Delete user streaks
+      await tx.streak.deleteMany({
+        where: { userId },
+      });
+
+      // Delete user commitments
+      await tx.commitments.deleteMany({
+        where: { userId },
+      });
+
+      // Delete notes associated with user todos
+      const userTodos = await tx.todo.findMany({
+        where: { userId },
+        select: { id: true },
+      });
+
+      if (userTodos.length > 0) {
+        const todoIds = userTodos.map(todo => todo.id);
+        
+        await tx.notes.deleteMany({
+          where: { todoId: { in: todoIds } },
+        });
+
+        // Get all tasks for these todos
+        const userTasks = await tx.task.findMany({
+          where: { todoId: { in: todoIds } },
+          select: { id: true },
+        });
+
+        if (userTasks.length > 0) {
+          const taskIds = userTasks.map(task => task.id);
+          
+          // Delete all subtasks
+          await tx.subTask.deleteMany({
+            where: { taskId: { in: taskIds } },
+          });
+
+          // Delete all tasks
+          await tx.task.deleteMany({
+            where: { todoId: { in: todoIds } },
+          });
+        }
+
+        // Delete all todos
+        await tx.todo.deleteMany({
+          where: { userId },
+        });
+      }
+
+      // Finally, delete the user
+      await tx.user.delete({
+        where: { id: userId },
+      });
     });
+
+    // Revalidate paths to ensure UI updates
+    revalidatePath("/");
+    revalidatePath("/profile");
   } catch (error) {
     console.error("Error deleting account:", error);
-    throw new Error("Failed to delete account");
+    throw new Error("Failed to delete account. Please try again.");
   }
 }
 

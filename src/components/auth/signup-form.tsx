@@ -3,7 +3,7 @@
 import type React from "react";
 import { useState, useTransition } from "react";
 import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import {
   Eye,
   EyeOff,
@@ -28,7 +28,8 @@ const SignUpForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
-
+  const router = useRouter();
+  
   interface SignUpDetails {
     email: string;
     password: string;
@@ -95,7 +96,7 @@ const SignUpForm = () => {
               console.log("Signing up...");
             },
             onSuccess: () => {
-              redirect("/");
+              router.push("/");
             },
             onError: (error) => {
               setErrors({
@@ -461,7 +462,7 @@ const SignUpForm = () => {
             {/* Sign In Link */}
             <div className="text-center">
               <Link
-                href="/sign-in"
+                href="/login"
                 className="group inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
               >
                 <span>Sign in to your account</span>

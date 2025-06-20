@@ -1,9 +1,9 @@
-import SignInForm from "@/components/auth/signin-form";
+import LoginForm from "@/components/auth/signin-form";
 
 function Login() {
   return (
     <div>
-      <SignInForm />
+      <LoginForm />
     </div>
   );
 }
