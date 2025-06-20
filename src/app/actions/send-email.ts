@@ -11,7 +11,7 @@ interface IEmailProps {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function sendEmail({ to, subject, text }: IEmailProps) {
-  if (!process.env.RESEND_API_KEY ) {
+  if (!process.env.RESEND_API_KEY) {
     throw new Error("RESEND_API_KEY environment variable is not set");
   }
   if (!process.env.EMAIL_FROM) {
@@ -23,7 +23,7 @@ async function sendEmail({ to, subject, text }: IEmailProps) {
       from: process.env.EMAIL_FROM,
       to,
       subject,
-      text
+      text,
     });
 
     if (error) {
