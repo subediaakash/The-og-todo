@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  crossOrigin: "anonymous",
 };
 
 export default nextConfig;
