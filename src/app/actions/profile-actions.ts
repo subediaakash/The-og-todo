@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { User } from "@/generated/prisma/";
 import type { ProfileStats, UpdateProfileData } from "@/types/profile";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
+import { authClient } from "@/lib/auth-client";
+import { redirect as nextRedirect } from "next/navigation";
 
 export async function getUserProfile(userId: string): Promise<User> {
   try {
@@ -120,11 +121,23 @@ export async function deleteAccount(userId: string): Promise<void> {
   }
 }
 
-export async function logoutUser(): Promise<void> {
-  try {
-    console.log("User logged out");
-  } catch (error) {
-    console.error("Error logging out:", error);
-    throw new Error("Failed to logout");
-  }
+// export async function logoutUser(): Promise<
+//   boolean | { success: boolean; error?: string }
+// > {
+//   const router = useRouter();
+//   try {
+//     await authClient.signOut();
+//     router.push("/login");
+//     return { success: true };
+//   } catch (error) {
+//     console.error("Sign out failed:", error);
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : "Failed to sign out",
+//     };
+//   }
+// }
+
+function redirect(url: string): never {
+  return nextRedirect(url);
 }

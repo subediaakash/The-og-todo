@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { getProfileStats, getUserProfile } from "../actions/profile-actions";
+import { getProfileStats, getUserProfile } from "../../actions/profile-actions";
 import { ProfileDashboard } from "@/components/profile/profile-dashboard";
 
 export default async function ProfilePage() {

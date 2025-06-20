@@ -2,25 +2,30 @@
 
 import { useState, useTransition } from "react";
 import { Trash2, LogOut, Shield, AlertTriangle, Download } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import {
   deleteAccount,
-  logoutUser,
   exportUserData,
 } from "@/app/actions/profile-actions";
+import { redirect } from "next/dist/server/api-utils";
+import { authClient } from "@/lib/auth-client";
 
 interface DangerZoneProps {
   userId: string;
 }
 
 export function DangerZone({ userId }: DangerZoneProps) {
+  const router = useRouter();
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = () => {
     startTransition(async () => {
       try {
-        await logoutUser();
+        const truth = await authClient.signOut();
+        router.push("/login");
       } catch (error) {
         console.error("Error logging out:", error);
       }

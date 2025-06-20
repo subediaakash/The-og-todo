@@ -10,7 +10,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    emailVerification: false,
+    
   },
   session: {
     freshAge: 60 * 60 * 7 * 5,
