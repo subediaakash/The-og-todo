@@ -6,9 +6,7 @@ export function middleware(req: NextRequest) {
 
   response.headers.set(
     "Access-Control-Allow-Origin",
-    process.env.NODE_ENV === "development"
-      ? "*"
-      : "https://general-todo.vercel.app/"
+    process.env.NODE_ENV === "development" ? "*" : "https//:ogtodo.space"
   );
   response.headers.set(
     "Access-Control-Allow-Methods",
@@ -27,5 +25,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // matcher: ["/api/:path*", "/profile/:path*"],
+  matcher: ["/api/:path*", "/profile/:path*"],
 };
