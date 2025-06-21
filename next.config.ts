@@ -7,6 +7,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Add crossOrigin here instead of separate export
+  crossOrigin: "anonymous",
   async headers() {
     return [
       {
@@ -17,7 +19,7 @@ const nextConfig: NextConfig = {
             key: "Access-Control-Allow-Origin",
             value:
               process.env.NODE_ENV === "development"
-                ? "*"
+                ? "http://localhost:3000"
                 : "https://ogtodo.space",
           },
           {
@@ -27,7 +29,7 @@ const nextConfig: NextConfig = {
           {
             key: "Access-Control-Allow-Headers",
             value:
-              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
           },
         ],
       },

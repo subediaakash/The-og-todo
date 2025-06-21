@@ -6,14 +6,10 @@ import sendEmail from "@/app/actions/send-email";
 const prisma = new PrismaClient();
 
 export const auth = betterAuth({
-  baseURL: process.env.NODE_ENV === "development" 
-    ? "http://localhost:3000" 
-    : "https://ogtodo.space",
-  
-  trustedOrigins: [
-    "http://localhost:3000",
-    "https://ogtodo.space"
-  ],
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://ogtodo.space",
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",
