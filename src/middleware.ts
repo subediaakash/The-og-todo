@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
 
   response.headers.set(
     "Access-Control-Allow-Origin",
-    process.env.NODE_ENV === "development" ? "*" : "https://ogtodo.space"
+    process.env.NODE_ENV === "development" ? "*" : "https://www.ogtodo.space"
   );
   response.headers.set(
     "Access-Control-Allow-Methods",
