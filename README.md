@@ -2,8 +2,24 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+First, start the Docker server by building and running the containers:
+```bash
+docker compose up --build
+```
 
+Next, apply the Prisma migrations to set up the database:
+```bash
+pnpx prisma migrate dev
+```
+
+Then, install the project dependencies:
+```bash
+npm i
+# or
+pnpm i
+```
+
+Finally, run the app locally:
 ```bash
 npm run dev
 # or
