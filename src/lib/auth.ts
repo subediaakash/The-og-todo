@@ -9,7 +9,7 @@ export const auth = betterAuth({
   baseURL:
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
-      : "https://ogtodo.space",
+      : "https://general-todo.vercel.app",
 
   database: prismaAdapter(prisma, {
     provider: "postgresql",
