@@ -33,14 +33,14 @@ export function ProfileDashboard({ user, stats }: ProfileDashboardProps) {
 
         {/* Navigation Tabs */}
         <div className="mb-8">
-          <div className="flex items-center bg-[#1a1a1a] border border-gray-700 rounded-xl p-1 w-fit">
+          <div className="flex items-center bg-[#1a1a1a] border border-gray-700 rounded-xl p-1 overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-6 py-3 min-w-[120px] rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                     activeTab === tab.id
                       ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
                       : "text-gray-400 hover:text-white hover:bg-gray-700/50"

@@ -138,22 +138,22 @@ export default function TodoWorkspaceManager({
       {/* Compact Header */}
       <div className="sticky top-0 z-50 bg-gradient-to-b from-[#0a0a0a] via-[#0a0a0a]/95 to-transparent backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+          {/* Updated flex container for mobile responsiveness */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-semibold text-white">Workspaces</h1>
               <div className="text-xs text-gray-400 px-2 py-1 bg-gray-800/50 rounded-md border border-gray-700/30">
                 {workspaces.length} total
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="relative">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto justify-center sm:justify-end">
+              <div className="relative w-full sm:w-auto">
                 <Calendar className="w-4 h-4 text-blue-400 absolute left-3 top-1/2 transform -translate-y-1/2 z-10" />
                 <input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="pl-9 pr-3 py-2 text-sm bg-gray-800/50 border border-gray-600/30 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
+                  className="w-full sm:w-auto pl-9 pr-3 py-2 text-sm bg-gray-800/50 border border-gray-600/30 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-200"
                 />
               </div>
               <button
